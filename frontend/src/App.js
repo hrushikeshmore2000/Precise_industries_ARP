@@ -14,6 +14,12 @@ import Onboarding from "./pages/Onboarding";
 import CustomersModule from "./modules/CustomersModule";
 import LeadsModule from "./modules/LeadsModule";
 import PartsModule from "./modules/PartsModule";
+import WorkCentersModule from "./modules/WorkCentersModule";
+import MachinesModule from "./modules/MachinesModule";
+import CustomerPOsModule from "./modules/CustomerPOsModule";
+import JobsModule from "./modules/JobsModule";
+import ShopFloorModule from "./modules/ShopFloorModule";
+import InventoryModule from "./modules/InventoryModule";
 
 const sections = [
   { label: "Workspace", items: [{ id: "dashboard", name: "Dashboard", icon: LayoutDashboard }] },
@@ -22,20 +28,20 @@ const sections = [
     { id: "leads", name: "Leads & Follow-ups", icon: UserPlus, live: true },
     { id: "rfqs", name: "RFQs", icon: FileText },
     { id: "quotations", name: "Quotations", icon: BriefcaseBusiness },
-    { id: "customer-pos", name: "Customer POs & Sales Orders", icon: ClipboardCheck },
+    { id: "customer-pos", name: "Customer POs & Sales Orders", icon: ClipboardCheck, live: true },
   ]},
   { label: "Factory floor", items: [
-    { id: "jobs", name: "Jobs, Work Orders & Job Cards", icon: Hammer },
+    { id: "jobs", name: "Jobs, Work Orders & Job Cards", icon: Hammer, live: true },
     { id: "planning", name: "Production Planning", icon: CalendarDays },
-    { id: "shop-floor", name: "Shop Floor Controls", icon: Gauge },
-    { id: "work-centers", name: "Work Centers", icon: Factory },
-    { id: "machines", name: "Machines", icon: Factory },
+    { id: "shop-floor", name: "Shop Floor Controls", icon: Gauge, live: true },
+    { id: "work-centers", name: "Work Centers", icon: Factory, live: true },
+    { id: "machines", name: "Machines", icon: Factory, live: true },
     { id: "maintenance", name: "Maintenance", icon: Wrench },
   ]},
   { label: "Materials", items: [
     { id: "parts", name: "Part Master", icon: Box, live: true },
     { id: "bom", name: "BOM & Routing", icon: Package },
-    { id: "inventory", name: "Inventory · Items, RM, FG & WIP", icon: Package },
+    { id: "inventory", name: "Inventory · Items, RM, FG & WIP", icon: Package, live: true },
     { id: "purchase", name: "Purchase · Suppliers, RFQs & GRN", icon: ShoppingCart },
     { id: "job-work", name: "Job Work / Subcontracting", icon: Truck },
     { id: "tools", name: "Tool Management", icon: Wrench },
@@ -239,6 +245,12 @@ function LiveModule({ id }) {
   if (id === "customers") return <CustomersModule/>;
   if (id === "leads") return <LeadsModule/>;
   if (id === "parts") return <PartsModule/>;
+  if (id === "work-centers") return <WorkCentersModule/>;
+  if (id === "machines") return <MachinesModule/>;
+  if (id === "customer-pos") return <CustomerPOsModule/>;
+  if (id === "jobs") return <JobsModule/>;
+  if (id === "shop-floor") return <ShopFloorModule/>;
+  if (id === "inventory") return <InventoryModule/>;
   return null;
 }
 

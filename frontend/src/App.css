@@ -132,3 +132,75 @@
 .dark-mode .auth-field input,.dark-mode .auth-field select,.dark-mode .auth-field textarea{background:#111b2b;color:#d7e2ef;border-color:#34445b}
 .dark-mode .company-menu,.dark-mode .profile-menu{background:#172235;border-color:#2b3a50;color:#e5edf7}
 .dark-mode .company-option:hover,.dark-mode .profile-menu-item:hover{background:#22324a}
+
+/* ================= Phase 4: manufacturing modules ================= */
+tr.clickable{cursor:pointer;transition:background-color .12s}
+tr.clickable:hover{background:#f8fafc}
+.row-actions{display:flex;gap:6px;align-items:center;white-space:nowrap}
+.primary-btn.small{height:32px;padding:0 10px;font-size:11px}
+.mini-kpi{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.mini-kpi small{color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.6px}
+.mini-kpi b{font:600 20px Outfit;color:var(--navy)}
+.mini-kpi .progress{margin-top:6px}
+.job-summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:10px 0 6px}
+@media(max-width:900px){.job-summary-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.job-summary-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Event log */
+.event-log{padding:10px 16px 16px}
+.event-row{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.event-row:last-child{border-bottom:0}
+.event-row b{display:block;font-size:12px;color:var(--navy);text-transform:capitalize}
+.event-row small{display:block;color:#94a3b8;font-size:10.5px;margin-top:2px}
+.event-dot{width:9px;height:9px;border-radius:50%;background:#94a3b8;margin-top:5px;flex-shrink:0}
+.event-dot.operation_started,.event-dot.job_released{background:#0284c7}
+.event-dot.operation_completed,.event-dot.job_completed{background:#16a34a}
+.event-dot.operation_paused{background:#d97706}
+.event-dot.rejection_reported{background:#b91c1c}
+
+/* Shop-floor cards */
+.shopfloor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-top:6px}
+.op-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px;transition:box-shadow .16s}
+.op-card:hover{box-shadow:0 8px 20px #0f172a12}
+.op-card.status-running{border-color:#22c55e;background:linear-gradient(180deg,#f0fdf4 0,#fff 60%)}
+.op-card.status-paused{border-color:#f59e0b;background:linear-gradient(180deg,#fffbeb 0,#fff 60%)}
+.op-card.status-completed{opacity:.7}
+.op-card header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.op-card header .eyebrow{margin-bottom:4px}
+.op-card h3{font:600 18px Outfit;color:var(--navy);margin:0 0 3px}
+.op-card header small{color:#64748b;font-size:11.5px}
+.op-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#f8fafc;border-radius:8px;padding:10px}
+.op-metrics small{color:#94a3b8;font-size:10px;letter-spacing:.4px;text-transform:uppercase;display:block}
+.op-metrics b{font:600 16px Outfit;color:var(--navy);display:block}
+.op-actions{display:flex;gap:8px;flex-wrap:wrap}
+.primary-btn.big,.outline-btn.big{height:46px;padding:0 18px;font:600 13px Outfit;flex:1;justify-content:center}
+.outline-btn.big{background:#fff}
+
+/* Extra badge colors */
+.badge.running{background:#dcfce7;color:#15803d}
+.badge.idle{background:#e2e8f0;color:#475569}
+.badge.down{background:#fee2e2;color:#b91c1c}
+.badge.maintenance{background:#fef3c7;color:#a16207}
+.badge.pending{background:#e2e8f0;color:#475569}
+.badge.ready{background:#e0f2fe;color:#0369a1}
+.badge.paused{background:#fef3c7;color:#a16207}
+.badge.completed{background:#dcfce7;color:#15803d}
+.badge.blocked{background:#fee2e2;color:#b91c1c}
+.badge.draft{background:#e2e8f0;color:#475569}
+.badge.released{background:#e0f2fe;color:#0369a1}
+.badge.in_progress{background:#dbeafe;color:#1d4ed8}
+.badge.on_hold{background:#fef3c7;color:#a16207}
+.badge.cancelled{background:#fee2e2;color:#b91c1c}
+.badge.confirmed{background:#e0e7ff;color:#3730a3}
+.badge.in_production{background:#dbeafe;color:#1d4ed8}
+.badge.partially_shipped{background:#fef3c7;color:#a16207}
+.badge.closed{background:#dcfce7;color:#15803d}
+
+/* Dark mode */
+.dark-mode .op-card{background:#172235;border-color:#2b3a50}
+.dark-mode .op-card.status-running{background:linear-gradient(180deg,#052e16 0,#172235 60%);border-color:#166534}
+.dark-mode .op-card.status-paused{background:linear-gradient(180deg,#3b2607 0,#172235 60%);border-color:#a16207}
+.dark-mode .op-card h3,.dark-mode .op-metrics b,.dark-mode .mini-kpi b{color:#f0f5fb}
+.dark-mode .op-metrics{background:#0f172a}
+.dark-mode .mini-kpi{background:#172235;border-color:#2b3a50}
+.dark-mode tr.clickable:hover{background:#22324a}
