@@ -1,44 +1,58 @@
-# ForgeFlow Manufacturing ERP — Product Requirements Document
+# Precise Industries — Manufacturing ERP · PRD
 
 ## Original problem statement
-Build Phase 1 and Phase 2 of a manufacturing ERP as a complete frontend-only experience. Do not connect Supabase, authentication backend, Cloudinary, database, or API endpoints. Use realistic manufacturing mock data. Make every major ERP module visually navigable for factory owners, production managers, and shop-floor supervisors.
+Build a manufacturing ERP in 6 phases. Phase 1 & 2 are FRONTEND-ONLY (no backend, no Supabase, no Cloudinary, no auth). All data must be realistic manufacturing mock data. Deliver the complete visual language, sidebar navigation, dashboard, CRM, RFQ, Quotation, Customer PO, Jobs, Part Master, BOM, Routing, Production Planning, Shop Floor, Inventory, Purchase, Job Work, Quality, Machines, Maintenance, Tool Management, Dispatch, Finance UI, Reports, Documents, and Settings screens.
 
-## Architecture decisions
-- React frontend with a single responsive ERP application shell and client-side module state.
-- Static mock data powers dashboard KPIs, charts, tables, statuses, search, and feedback states.
-- No backend, API, authentication, persistence, or external integration is included in this phase.
-- Reusable navigation, KPI, table, badge, toolbar, toast, and responsive drawer patterns keep modules consistent.
-- ForgeFlow Manufacturing is the working brand because no company name was provided.
+## Brand
+- **Company / product name in the ERP shell: Precise Industries**
 
 ## User personas
-- Factory owner / management: needs high-level production, utilization, delivery, and receivables visibility.
-- Production manager: needs jobs, planning, material shortages, machine status, and quality signals.
-- Shop-floor supervisor: needs quick access to work orders, shop-floor controls, machines, maintenance, and material flow.
+- Factory owner / MD
+- Production manager
+- Shop-floor supervisor / operator
+- Purchase & inventory staff
+- Quality inspector
+- Sales / CRM user
 
 ## Core requirements (static)
-- Responsive shell with collapsible sidebar, mobile drawer, top bar, breadcrumbs, search, notifications, quick create, company selector, profile, and theme toggle.
-- Dashboard with KPI cards, production trend, machine utilization, production jobs, shortages, and upcoming deliveries.
-- Navigable, non-blank screens for CRM, RFQs, quotations, customer POs, jobs, planning, shop floor, part master, BOM/routing, inventory, purchasing, job work, quality, machines, maintenance, tools, dispatch, finance, reports, and settings.
-- Dense readable tables with filters, search, column action, pagination, status badges, responsive overflow handling, and mock feedback.
+- Collapsible left sidebar with 23+ modules grouped into Workspace / Customer flow / Factory floor / Materials / Control center.
+- Topbar with breadcrumbs, global search, notifications, theme toggle, profile.
+- Light + dark theme.
+- Responsive shell with a mobile drawer.
+- Reusable module view: title, toolbar (search + filter + columns), summary strip, dense table with status badges, pagination.
+- Dashboard with 8 KPIs, production trend chart, machine utilization donut, today's jobs table, material shortages, upcoming deliveries.
 
-## What's implemented
-
-### 2026-09-17
-- Replaced the starter splash screen with the ForgeFlow Manufacturing ERP shell.
-- Added all Phase 1 and Phase 2 module navigation entries and functional module views.
-- Added management dashboard with eight KPIs, production chart, utilization donut, production table, shortages, and deliveries.
-- Added static realistic mock manufacturing data, statuses, progress indicators, responsive tables, search navigation, toast feedback, theme toggle, sidebar collapse, and mobile drawer.
-- Verified with production build and browser testing: dashboard, all 20 module views, key interactions, mobile layout, and no horizontal overflow passed.
+## What's implemented (as of 2026-02)
+- Full application shell with brand "Precise Industries" (renamed from ForgeFlow Manufacturing on 2026-02).
+- Sidebar navigation covering all Phase 1 & 2 modules.
+- Interactive dashboard with mock KPIs, mock production trend + donut chart, mock jobs table, mock shortage & delivery rows.
+- Generic ModuleView renders realistic mock records for every Phase 1 & 2 module (CRM, RFQ, Quotation, Customer POs, Jobs, Planning, Shop Floor, Work Centers, Part Master, BOM, Inventory, Purchase, Job Work, Quality, Machines, Maintenance, Tools, Dispatch, Finance, Reports, Documents, Settings).
+- Global search with jump-to-module results.
+- Toast feedback wired on every interactive button (company selector, profile, notifications, filters, columns, row open, pagination, etc.).
+- Sidebar collapse + mobile drawer + light/dark theme toggle.
+- Frontend testing agent passed 100% (iteration 3).
 
 ## Prioritized backlog
-- P0: Connect persistent data models and API CRUD for records, jobs, inventory, quality, and finance.
-- P0: Add authentication, role-based access, and company/plant data boundaries.
-- P1: Replace module summary tables with full create/edit/detail workflows and printable documents.
-- P1: Add real-time shop-floor job status, machine telemetry, and material requests.
-- P2: Add file storage for drawings, attachments, and document revisions.
-- P2: Add accounting integration and production analytics exports.
+### P0 (Phase 3 — pending)
+- Database schema (MongoDB) for all 23 modules.
+- Authentication (JWT or Emergent Google Auth — user to choose in Phase 3).
+- FastAPI CRUD endpoints per module.
+- Replace mock data with real API calls.
 
-## Remaining next tasks
-- Phase 3: establish backend schema and API contracts without changing the existing visual language.
-- Introduce real data behind dashboard and module tables while preserving the mock-data fallback for demos.
-- Add audit history, permissions, and document workflows after authentication is defined.
+### P1
+- Deep per-module screens: quotation builder with cost breakdown, RFQ wizard, drag-and-drop routing builder, shop-floor operator kiosk, planning gantt, quality inspection forms with tolerances, delivery challan builder, part-revision history UI.
+- Refactor `App.js` into per-module page components + a shared layout.
+- Error boundary + global loading skeletons.
+
+### P2
+- Tally accounting integration section.
+- Document / drawing upload (object storage).
+- Reports engine + export.
+- Role & permission matrix UI.
+- Notification center with real events.
+
+## Next tasks
+1. Confirm scope and integrations for Phase 3 with the user (auth method, database, storage).
+2. Refactor `/app/frontend/src/App.js` into `pages/`, `components/`, `data/` folders before wiring the backend.
+3. Design Mongo document models per module.
+4. Build FastAPI routers module-by-module.
