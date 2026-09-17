@@ -1,0 +1,19 @@
+{
+  "summary": "Verified SQL migration ordering fix for /app/backend/migrations/001_initial.sql against local Postgres 15. All 7 requested checks passed: (1) organization_members table (line 70) is created BEFORE private.is_org_member() function (line 248); (2) migration runs end-to-end on a fresh DB with exit code 0 and zero ERROR lines; (3) all 9 expected tables exist with rowsecurity=t; (4) 2nd run is idempotent — exit 0 and no ERROR lines (only NOTICE 'skipping' lines); (5) org_members_insert policy WITH CHECK contains ONLY has_org_role check, no user_id=auth.uid() self-insert clause; (6) create_organization_with_owner RPC has revoke from public, revoke from anon, grant to authenticated (lines 426-428); (7) frontend testing skipped per request (testing_type=backend only).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/migrations/001_initial.sql"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Migration correctly reordered — helpers now live in Section 6 after business tables in Section 4. Idempotent DO/EXCEPTION blocks and drop-policy-if-exists patterns work correctly on re-run.",
+    "org_members_delete policy still allows a user to delete their own membership row (user_id = auth.uid()) — intentional (leave-org), noting for awareness.",
+    "auth.uid() stub returned NULL in the local verify DB; all RLS policies still compiled. Real Supabase provides the actual auth.uid() so runtime behavior will differ — cannot test policy enforcement locally without seeding auth.users + JWT context."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "N/A (skipped)"},
+  "seed_data_creation": "Created ephemeral local DB 'migration_verify' with auth schema stub (auth.users table + auth.uid() function) and anon/authenticated roles for migration verification only. Not committed anywhere; DB can be dropped.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Migration file 001_initial.sql is verified valid & idempotent against Postgres 15 locally. Real Supabase apply not attempted per instructions. If future changes touch RLS or private schema helpers, re-run: dropdb migration_verify && createdb migration_verify, seed auth stub, then psql -v ON_ERROR_STOP=1 -f 001_initial.sql. Note roles anon/authenticated already exist cluster-wide on this container.",
+  "rca of the issue": "Original bug: private.is_org_member() defined LANGUAGE sql was created BEFORE public.organization_members table. Postgres validates LANGUAGE sql function bodies at CREATE time (unlike plpgsql), so parser resolved public.organization_members and threw 42P01. Fix: move the entire private helpers block to Section 6, after Section 4 business tables. Verified by grep + fresh-DB apply."
+}
