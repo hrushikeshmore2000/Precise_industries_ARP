@@ -25,35 +25,7 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 --------------------------------------------------------------------------------
--- 2. HELPER: private schema + is_org_member (SECURITY DEFINER)
---------------------------------------------------------------------------------
-create schema if not exists private;
-grant usage on schema private to authenticated;
-
-create or replace function private.is_org_member(org_id uuid)
-returns boolean language sql stable security definer set search_path = '' as $$
-  select exists (
-    select 1 from public.organization_members m
-    where m.organization_id = org_id and m.user_id = (select auth.uid())
-  );
-$$;
-revoke all on function private.is_org_member(uuid) from public;
-grant execute on function private.is_org_member(uuid) to authenticated;
-
-create or replace function private.has_org_role(org_id uuid, roles public.organization_role[])
-returns boolean language sql stable security definer set search_path = '' as $$
-  select exists (
-    select 1 from public.organization_members m
-    where m.organization_id = org_id
-      and m.user_id = (select auth.uid())
-      and m.role = any(roles)
-  );
-$$;
-revoke all on function private.has_org_role(uuid, public.organization_role[]) from public;
-grant execute on function private.has_org_role(uuid, public.organization_role[]) to authenticated;
-
---------------------------------------------------------------------------------
--- 3. AUDIT TRIGGER FUNCTION
+-- 2. AUDIT TRIGGER FUNCTION (no table dependencies)
 --------------------------------------------------------------------------------
 create or replace function public.set_audit_columns()
 returns trigger language plpgsql security invoker set search_path = '' as $$
@@ -73,7 +45,7 @@ begin
 end; $$;
 
 --------------------------------------------------------------------------------
--- 4. CORE TABLES: organizations / members / profiles
+-- 3. CORE TABLES: organizations / members / profiles
 --------------------------------------------------------------------------------
 create table if not exists public.organizations (
   id uuid primary key default gen_random_uuid(),
@@ -126,7 +98,7 @@ create trigger profiles_audit before insert or update on public.profiles
 for each row execute function public.set_audit_columns();
 
 --------------------------------------------------------------------------------
--- 5. BUSINESS TABLES (Phase-3 smart slice: customers, leads, parts)
+-- 4. BUSINESS TABLES (Phase-3 smart slice: customers, leads, parts)
 --------------------------------------------------------------------------------
 create table if not exists public.customers (
   id uuid primary key default gen_random_uuid(),
@@ -254,7 +226,7 @@ create table if not exists public.part_revisions (
 create index if not exists idx_part_revs_part on public.part_revisions(part_id);
 
 --------------------------------------------------------------------------------
--- 6. AUDIT TRIGGERS on business tables
+-- 5. AUDIT TRIGGERS on business tables
 --------------------------------------------------------------------------------
 do $$
 declare t text;
@@ -265,6 +237,35 @@ begin
     execute format('create trigger %I_audit before insert or update on public.%I for each row execute function public.set_audit_columns()', t, t);
   end loop;
 end $$;
+
+--------------------------------------------------------------------------------
+-- 6. HELPER: private schema + is_org_member / has_org_role (SECURITY DEFINER)
+--    (Created AFTER business tables exist so `language sql` validation passes.)
+--------------------------------------------------------------------------------
+create schema if not exists private;
+grant usage on schema private to authenticated;
+
+create or replace function private.is_org_member(org_id uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.organization_members m
+    where m.organization_id = org_id and m.user_id = (select auth.uid())
+  );
+$$;
+revoke all on function private.is_org_member(uuid) from public;
+grant execute on function private.is_org_member(uuid) to authenticated;
+
+create or replace function private.has_org_role(org_id uuid, roles public.organization_role[])
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.organization_members m
+    where m.organization_id = org_id
+      and m.user_id = (select auth.uid())
+      and m.role = any(roles)
+  );
+$$;
+revoke all on function private.has_org_role(uuid, public.organization_role[]) from public;
+grant execute on function private.has_org_role(uuid, public.organization_role[]) to authenticated;
 
 --------------------------------------------------------------------------------
 -- 7. RLS: enable on all tenant tables + policies
@@ -285,7 +286,8 @@ grant select, insert, update, delete on
   public.parts, public.part_revisions
 to authenticated;
 
--- organizations: members can read their org; anyone signed-in can insert a new org (they become owner via a companion insert).
+-- organizations: members can read their org; any authenticated user may create a new org
+-- (initial owner membership is created inside create_organization_with_owner() RPC).
 drop policy if exists organizations_select on public.organizations;
 create policy organizations_select on public.organizations for select to authenticated
   using ((select private.is_org_member(id)));
@@ -343,7 +345,7 @@ drop policy if exists profiles_update_self on public.profiles;
 create policy profiles_update_self on public.profiles for update to authenticated
   using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
--- Business-table policy factory macro (via DO block).
+-- Business-table policy factory (via DO block).
 do $$
 declare t text;
 begin
