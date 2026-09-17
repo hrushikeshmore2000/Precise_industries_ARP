@@ -30,7 +30,7 @@ export default function PartsModule() {
   const loadCustomerOptions = useCallback(async () => {
     if (!activeOrgId) return;
     try { setCustomerOptions(await fetchCustomerOptions(activeOrgId)); }
-    catch (e) { /* ignore */ }
+    catch (e) { toast.error(`Could not load customer list: ${e.message}`); }
   }, [activeOrgId]);
 
   const load = useCallback(async () => {
@@ -80,7 +80,7 @@ export default function PartsModule() {
           <h1 data-testid="module-title">Part Master</h1>
           <p>Every part, drawing revision and costing at your fingertips.</p>
         </div>
-        <button className="primary-btn" data-testid="create-part-button" onClick={() => setEditing({ unit: "nos", active: true })}><Plus size={16}/> New part</button>
+        <button className="primary-btn" data-testid="create-part-button" onClick={async () => { await loadCustomerOptions(); setEditing({ unit: "nos", active: true }); }}><Plus size={16}/> New part</button>
       </div>
       <div className="module-toolbar">
         <div className="search-field small">
@@ -118,7 +118,7 @@ export default function PartsModule() {
                   <td>{r.material || "—"}<small>{r.material_grade || ""}</small></td>
                   <td>{r.weight_kg ? `${r.weight_kg} kg` : "—"}</td>
                   <td>{r.selling_price ? `₹${Number(r.selling_price).toLocaleString("en-IN")}` : "—"}</td>
-                  <td><button className="outline-btn" data-testid={`part-edit-${i}`} onClick={() => setEditing(r)}>Edit</button></td>
+                  <td><button className="outline-btn" data-testid={`part-edit-${i}`} onClick={async () => { await loadCustomerOptions(); setEditing(r); }}>Edit</button></td>
                 </tr>
               ))}
             </tbody>

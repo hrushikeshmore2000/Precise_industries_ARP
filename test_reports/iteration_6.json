@@ -1,0 +1,30 @@
+{
+  "summary": "End-to-end frontend test of Phase 3 Supabase integration (auth + onboarding + real CRUD for Customers/Leads/Parts + cross-org RLS). 11 of 12 scenarios PASSED. The critical RLS isolation test passed: user2 saw empty tables (0/0/0) across all three modules while user1's data persisted (1/1/1) after re-login. One minor issue found: when creating a Part immediately after navigating to the module, the native <select> for customer_id contained only the 'Select…' placeholder — the async fetchCustomerOptions() had not resolved by the time the drawer was opened, resulting in the part being saved with customer_id=null (row displays '—' instead of 'ABC Auto Components').",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PartsModule DrawerForm", "issue": "Race condition: customer_id <select> renders empty (only 'Select…' option) when drawer is opened before fetchCustomerOptions() resolves. Newly created parts get customer_id=null and row shows '—' for Customer column even when customers exist. Repro: nav-parts → immediately click create-part-button → open dropdown → only 'Select…' present.", "selector": "[data-testid=\"part-field-customer_id\"]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Sidebar 'connected to Supabase' indicator", "issues": ["Green dot exists visually next to Customers, Leads & Follow-ups and Part Master items (verified in screenshot), but is not implemented with a bg-green/bg-emerald Tailwind class, so it is not queryable via those class selectors. Consider adding a data-testid like 'nav-live-indicator-<module>' for testability."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/screens/02_user1_dashboard.png", "/app/test_reports/screens/03_parts.png"],
+  "action_items": [
+    "Fix Parts create-drawer race: either (a) await loadCustomerOptions() before enabling create-part-button, (b) show a loading state on the customer select until options are ready, or (c) call loadCustomerOptions() again on drawer open. Currently a user who clicks 'New part' fast enough will silently save a part with no linked customer.",
+    "Optional: add data-testid to sidebar live-connection dots for easier automated verification."
+  ],
+  "critical_code_review_comments": [
+    "PartsModule.jsx line 32-33: fetchCustomerOptions error is swallowed silently ('/* ignore */'). If the query fails (RLS/network), the user has no feedback and the dropdown is silently empty. Show toast.error(e.message) like the load() function does.",
+    "PartsModule.jsx: customerOptions is loaded once on mount but not refreshed when a customer is added in the Customers module. If the user creates a customer in another tab / earlier session and then opens Parts, that customer will show, but within a single session flow the timing is fragile — consider re-fetching on drawer open."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "92% (11/12 scenarios passed)"},
+  "test_credentials": "Created dynamically per run: e2e-<timestamp>-1@qatest.local and e2e-<timestamp>-2@qatest.local, password Passw0rd! (email confirmation disabled at Supabase project level — signup returns immediate session).",
+  "seed_data_creation": "Each run creates 2 Supabase auth users, 2 organizations ('QA Company One', 'QA Company Two'), 1 customer (ABC Auto Components), 1 lead (XYZ Motors), 1 part (HSG-284) under org1. Consider adding a cleanup job or a scheduled purge of e2e-* users in Supabase.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Full Phase 3 smoke passed. All testids match implementation. Signup → immediate session → onboarding-form works. Cross-org RLS verified end-to-end on real Supabase (user2 sees 0 rows in customers/leads/parts). Company selector is per-user correctly. The only functional gap is the Parts customer dropdown race described above. When writing Playwright, note: (1) customer-field-status, lead-field-source, lead-field-status, part-field-unit are native <select>s use select_option; (2) toasts are Sonner bottom-right; (3) search has ~500ms debounce; (4) 'PRECISE INDUSTRIES' brand text is split across two lines in the sidebar so text= exact-match won't work, use partial.",
+  "rca of the issue": "Parts customer dropdown empty: In PartsModule.jsx the drawer's FIELDS array is built from `customerOptions` state, which starts as []. loadCustomerOptions() is fired in useEffect on mount but is async — if the user clicks 'New part' before the fetch resolves, the DrawerForm renders with only the empty placeholder option. Saving proceeds without validation, persisting customer_id=null. Fix: either gate the create button on `customerOptions.length > 0 || loading===false`, or trigger a fresh loadCustomerOptions() when the drawer opens and show a spinner inside the select until it resolves."
+}
